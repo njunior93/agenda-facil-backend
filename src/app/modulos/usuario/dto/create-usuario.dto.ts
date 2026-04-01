@@ -13,7 +13,7 @@ export class CreateUsuarioDto {
     
     @IsString()
     @IsNotEmpty()
-    @MinLength(5)
-    @MaxLength(10)
+    @MinLength(8)
+    @MaxLength(32)
     senha: string;
 }

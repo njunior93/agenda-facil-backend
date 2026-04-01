@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class LoginAuthDto{
     @ApiProperty({
-        description: 'Login do usuário',
+        description: 'email do usuario para o login',
         example: 'usuario@email.com',
         maxLength: 255
     })
@@ -12,10 +12,10 @@ export class LoginAuthDto{
     email: string;
 
     @ApiProperty({
-        description: 'Login do usuário',
+        description: 'senha do usuario',
         example: 'usuario123',
-        minLength: 5,
-        maxLength: 10
+        minLength: 8,
+        maxLength: 32
     })
     @IsString()
     @IsNotEmpty()
