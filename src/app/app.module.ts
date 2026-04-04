@@ -8,11 +8,13 @@ import { AgendamentoModule } from './modulos/agendamento/agendamento.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
+import jwtConfig from 'src/auth/config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [jwtConfig]
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -21,7 +23,7 @@ import { AuthModule } from 'src/auth/auth.module';
         rejectUnauthorized: false
       },
       autoLoadEntities: true, 
-      synchronize: false,
+      synchronize: true,
     }),
     AuthModule, 
     UsuarioModule, 

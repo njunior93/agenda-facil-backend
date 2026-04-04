@@ -12,7 +12,7 @@ export class AuthTokenGuard implements CanActivate {
     private readonly jwtService: JwtService 
    )
   {}
-  canActivate(context: ExecutionContext,): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext,):  Promise<boolean>  {
     const request: Request = context.switchToHttp().getRequest();
     const token = this.extracaoToken(request);
 
@@ -20,8 +20,10 @@ export class AuthTokenGuard implements CanActivate {
       throw new UnauthorizedException('Token de autenticação não fornecido');
     }
 
-    try {
-       this.jwtService.verifyAsync(token, this.jwtConfiguration);
+    try {    
+      const payload =  await this.jwtService.verifyAsync(token, this.jwtConfiguration);
+
+      request['usuario'] = payload;
     } catch (error) {
       throw new UnauthorizedException('Token de autenticação inválido');
     }
