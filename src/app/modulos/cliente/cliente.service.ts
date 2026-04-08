@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, HttpException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,18 +24,39 @@ export class ClienteService {
 
       const novoCliente = this.clienteRepository.create(cliente);
       return await this.clienteRepository.save(novoCliente);
-    } catch (error) {
+    } catch (error: any) {
       if(error.code === '23505') {
         throw new ConflictException('Email já cadastrado');
       }
 
-      console.error('Erro ao salvar cliente:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException('Erro ao salvar cliente');
     }
   }
 
-  findAll() {
-    return `This action returns all cliente`;
+  async findAll(payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+
+    try{
+      const clientes = await this.clienteRepository.find({
+        where: { usuario: { id: usuario_id } },
+        order: { createAt: 'DESC' },
+        select: { id: true, nome: true, email: true, telefone: false, celular: true, createAt: false }
+      });
+   
+      return clientes;
+
+    } catch(error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Erro ao buscar clientes');
+    }
+    
   }
 
   findOne(id: number) {

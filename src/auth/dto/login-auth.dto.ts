@@ -9,7 +9,7 @@ export class LoginAuthDto{
     })
     @IsEmail()
     @IsNotEmpty()
-    email: string;
+    email!: string;
 
     @ApiProperty({
         description: 'senha do usuario',
@@ -19,5 +19,5 @@ export class LoginAuthDto{
     })
     @IsString()
     @IsNotEmpty()
-    senha: string;
+    senha!: string;
 }

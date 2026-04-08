@@ -15,11 +15,14 @@ export class ClienteController {
     return this.clienteService.create(createClienteDto, payload);
   }
 
-  @Get()
-  findAll() {
-    return this.clienteService.findAll();
+  @UseGuards(AuthTokenGuard)
+  @Get('/listar-clientes')
+  findAll(@Req() request:Request) {
+    const payload = request['usuario']
+    return this.clienteService.findAll(payload);
   }
 
+  @UseGuards(AuthTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.clienteService.findOne(+id);

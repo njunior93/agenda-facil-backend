@@ -6,23 +6,23 @@ import { Cliente } from "../../cliente/entities/cliente.entity";
 @Entity()
 export class Usuario {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id!: string;
 
     @Column({type: "varchar", length: 255})
-    nome: string;
+    nome!: string;
 
     @Column({unique: true})
     @IsEmail()
-    email: string;
+    email!: string;
 
     @Column({type: "varchar", length: 60, nullable: false})
-    senhaHash: string;
+    senhaHash!: string;
 
     @Column({type: "boolean", default: true})
-    ativo: boolean;
+    ativo!: boolean;
 
     @OneToMany(() => Cliente, (cliente) => cliente.usuario)
-    clientes: Cliente[];
+    clientes!: Cliente[];
 
     @CreateDateColumn()
     createAt?: Date;

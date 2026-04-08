@@ -6,7 +6,7 @@ export class CreateClienteDto {
     @IsNotEmpty()
     @MinLength(10)
     @MaxLength(255)
-    nome: string;
+    nome!: string;
 
     @IsEmail()
     email?: string;
@@ -23,5 +23,5 @@ export class CreateClienteDto {
 
     @IsString()
     @IsNotEmpty()
-    user_id: string;
+    user_id!: string;
 }
