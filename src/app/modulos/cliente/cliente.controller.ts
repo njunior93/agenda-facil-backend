@@ -3,13 +3,14 @@ import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { AuthTokenGuard } from 'src/auth/guard/auth-token.guard';
+import { request } from 'express';
 
 @Controller('cliente')
 export class ClienteController {
   constructor(private readonly clienteService: ClienteService) {}
   
   @UseGuards(AuthTokenGuard)
-  @Post('/gravar-cliente')
+  @Post('/criar-cliente')
   create(@Body() createClienteDto: CreateClienteDto, @Req() request:Request) {
     const payload = request['usuario']
     return this.clienteService.create(createClienteDto, payload);
@@ -23,14 +24,17 @@ export class ClienteController {
   }
 
   @UseGuards(AuthTokenGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clienteService.findOne(+id);
+  @Get('/localizar-cliente/:id')
+  findOne(@Param('id') id: string, @Req() request:Request) {
+    const payload = request['usuario']
+    return this.clienteService.findOne(id, payload);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClienteDto: UpdateClienteDto) {
-    return this.clienteService.update(+id, updateClienteDto);
+  @UseGuards(AuthTokenGuard)
+  @Patch('/editar-cliente/:id')
+  update(@Param('id') id: string, @Body() updateClienteDto: UpdateClienteDto, @Req() request: Request) {
+    const payload = request['usuario']
+    return this.clienteService.update(id, updateClienteDto, payload);
   }
 
   @Delete(':id')

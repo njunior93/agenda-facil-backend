@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException, HttpException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, HttpException, NotFoundException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -46,6 +46,10 @@ export class ClienteService {
         order: { createAt: 'DESC' },
         select: { id: true, nome: true, email: true, telefone: false, celular: true, createAt: false }
       });
+
+      if(!clientes){
+        throw new NotFoundException('Lista de clientes não encontrada')
+      }
    
       return clientes;
 
@@ -59,12 +63,50 @@ export class ClienteService {
     
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cliente`;
+  async findOne(id: string, payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+
+    try{
+      const cliente = await this.clienteRepository.findOne({
+        where: { id, usuario: { id: usuario_id }},      
+      });
+
+      if(!cliente){
+        throw new NotFoundException('Cliente não encontrado');
+      }
+
+      return cliente;
+
+    }catch(error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao buscar cliente');
+    }
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
-    return `This action updates a #${id} cliente`;
+  async update(id: string, updateClienteDto: UpdateClienteDto, payload: PayloadDto) {
+    try{
+      const cliente = await this.findOne(id, payload);
+
+      const clienteAtualizado = {
+        nome: updateClienteDto.nome,
+        email: updateClienteDto.email,
+        telefone: updateClienteDto.telefone?.replace(/\D/g, ''),
+        celular: updateClienteDto?.celular?.replace(/\D/g, ''),
+      }
+
+      Object.assign(cliente, clienteAtualizado);
+
+      return await this.clienteRepository.save(cliente)
+    } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    console.log(error)
+    throw new InternalServerErrorException('Erro ao atualizar cliente');
+    
+    }
   }
 
   remove(id: number) {

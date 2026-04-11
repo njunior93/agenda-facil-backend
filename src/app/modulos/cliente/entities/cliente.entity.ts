@@ -15,7 +15,7 @@ export class Cliente {
     email!: string;
 
     @Column({type: "varchar", length: 10, nullable: true})
-    telefone!: string;
+    telefone?: string;
 
     @Column({type: "varchar", length: 11})
     celular!: string;
