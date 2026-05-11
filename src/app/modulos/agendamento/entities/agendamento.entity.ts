@@ -19,6 +19,9 @@ export class Agendamento {
     @Column({type: "time", nullable: false})
     hora!: string;
 
+    @Column({type: 'enum', enum: ['a','f','c'], nullable: false})
+    status!: string;
+
     @CreateDateColumn()
     createAt?: Date;
 

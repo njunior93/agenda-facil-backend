@@ -22,17 +22,22 @@ export class AgendamentoController {
     return this.agendamentoService.findAll(payload);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.agendamentoService.findOne(+id);
+  @UseGuards(AuthTokenGuard)
+  @Get('localizar-agendamento/:id')
+  findOne(@Param('id') id: string, @Req() request:Request) {
+    const payload = request['usuario']
+    return this.agendamentoService.findOne(id, payload);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAgendamentoDto: UpdateAgendamentoDto) {
-    return this.agendamentoService.update(+id, updateAgendamentoDto);
+  @UseGuards(AuthTokenGuard)
+  @Patch('editar-agendamento/:id')
+  update(@Param('id') id: string, @Body() updateAgendamentoDto: UpdateAgendamentoDto, @Req() request:Request) {
+    const payload = request['usuario']
+    return this.agendamentoService.update(id, updateAgendamentoDto, payload);
   }
 
-  @Delete(':id')
+  @UseGuards(AuthTokenGuard)
+  @Delete('excluir-agendamento/:id')
   remove(@Param('id') id: string) {
     return this.agendamentoService.remove(+id);
   }

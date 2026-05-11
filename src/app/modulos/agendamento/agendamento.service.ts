@@ -19,6 +19,7 @@ export class AgendamentoService {
         servico: createAgendamentoDto.servico,
         data: createAgendamentoDto.data,
         hora: createAgendamentoDto.hora,
+        status: 'a',
         cliente: { id: createAgendamentoDto.cliente_id },
         usuario: { id: usuario_id }
       }
@@ -47,7 +48,10 @@ export class AgendamentoService {
         
         order: { createAt: 'DESC' },
       
-        relations:{ cliente: true }
+        relations:{ cliente: true },
+
+        select: { cliente: {nome:true}}
+       
     });
 
       if(!agendamentos){
@@ -65,13 +69,51 @@ export class AgendamentoService {
     } 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} agendamento`;
+  async findOne(id: string, payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+
+    try{
+      const agendamento = await this.agendamentoRepository.findOne({
+        where: { id, usuario: { id: usuario_id }},
+        relations:{ cliente: true },
+      });
+
+      if(!agendamento){
+        throw new NotFoundException('Agendamento não encontrado');
+      }
+
+      return agendamento;
+
+    }catch(error:any){
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao buscar agendamento');
+    }
   }
 
-  update(id: number, updateAgendamentoDto: UpdateAgendamentoDto) {
-    return `This action updates a #${id} agendamento`;
-  }
+  async update(id: string, updateAgendamentoDto: UpdateAgendamentoDto, payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+
+    const agendamentoAtualizado = await this.agendamentoRepository.preload({
+      id,
+      ...updateAgendamentoDto,
+      usuario: { id: usuario_id }
+    });
+
+    if(!agendamentoAtualizado){
+        throw new NotFoundException('Agendamento não encontrado');
+      }
+
+      return await this.agendamentoRepository.save(agendamentoAtualizado);
+
+    }catch(error:any){
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao buscar agendamento');
+    }
+  
 
   remove(id: number) {
     return `This action removes a #${id} agendamento`;
