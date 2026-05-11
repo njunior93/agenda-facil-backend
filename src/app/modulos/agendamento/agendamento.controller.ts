@@ -1,20 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { AgendamentoService } from './agendamento.service';
 import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
 import { UpdateAgendamentoDto } from './dto/update-agendamento.dto';
+import { AuthTokenGuard } from 'src/auth/guard/auth-token.guard';
 
 @Controller('agendamento')
 export class AgendamentoController {
   constructor(private readonly agendamentoService: AgendamentoService) {}
 
-  @Post()
-  create(@Body() createAgendamentoDto: CreateAgendamentoDto) {
-    return this.agendamentoService.create(createAgendamentoDto);
+  @UseGuards(AuthTokenGuard)
+  @Post('/criar-agendamento')
+  create(@Body() createAgendamentoDto: CreateAgendamentoDto, @Req() request:Request) {
+    const payload = request['usuario']
+    return this.agendamentoService.create(createAgendamentoDto, payload);
   }
 
-  @Get()
-  findAll() {
-    return this.agendamentoService.findAll();
+  @UseGuards(AuthTokenGuard)
+  @Get('listar-agendamentos')
+  findAll(@Req() request:Request) {
+    const payload = request['usuario']
+    return this.agendamentoService.findAll(payload);
   }
 
   @Get(':id')

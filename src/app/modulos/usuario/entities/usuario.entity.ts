@@ -24,6 +24,9 @@ export class Usuario {
     @OneToMany(() => Cliente, (cliente) => cliente.usuario)
     clientes!: Cliente[];
 
+    @OneToMany(() => Cliente, (cliente) => cliente.usuario)
+    agendamentos!: Cliente[];
+
     @CreateDateColumn()
     createAt?: Date;
 }

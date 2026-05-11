@@ -19,7 +19,7 @@ export class CreateClienteDto {
     @IsString()
     @MinLength(11)
     @MaxLength(12)
-    celular?: string;
+    celular!: string;
 
     @IsString()
     @IsNotEmpty()
