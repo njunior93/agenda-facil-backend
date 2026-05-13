@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException, HttpException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, HttpException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -109,7 +109,36 @@ export class ClienteService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cliente`;
+  async remove(id: string, payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+    
+    try{
+      
+      const possuiAgendamento = await this.clienteRepository.findOne({
+        where: { id, usuario: { id: usuario_id }},
+        relations: { agendamentos: true }
+      });
+
+      if(possuiAgendamento && possuiAgendamento.agendamentos.length > 0){
+        throw new BadRequestException('Não é possível excluir cliente com agendamentos associados');
+      }
+
+      const cliente = await this.clienteRepository.findOne({
+        where: { id, usuario: { id: usuario_id }},
+      });
+
+      if(!cliente){
+        throw new NotFoundException('Cliente não encontrado');
+      }
+
+      return await this.clienteRepository.remove(cliente);
+
+    }catch(error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Erro ao excluir cliente');
+    }
   }
 }

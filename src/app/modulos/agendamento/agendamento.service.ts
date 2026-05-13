@@ -1,4 +1,4 @@
-import { ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
 import { UpdateAgendamentoDto } from './dto/update-agendamento.dto';
 import { PayloadDto } from 'src/auth/dto/payload.dto';
@@ -24,7 +24,21 @@ export class AgendamentoService {
         usuario: { id: usuario_id }
       }
 
+
+      const agendamentoExistente = await this.agendamentoRepository.findOne({
+        where:{
+          data: agendamento.data,
+          hora: agendamento.hora,
+          usuario: { id: usuario_id }
+        }
+      })
+
+      if(agendamentoExistente){
+        throw new BadRequestException('Já existe um agendamento para esta data e hora');
+      }
+
       const novoAgendamento = this.agendamentoRepository.create(agendamento);
+      
       return await this.agendamentoRepository.save(novoAgendamento);
     } catch (error: any) {
       if(error.code === '23505') {
@@ -50,7 +64,7 @@ export class AgendamentoService {
       
         relations:{ cliente: true },
 
-        select: { cliente: {nome:true}}
+        select: { cliente: {nome:true} }
        
     });
 
@@ -95,15 +109,16 @@ export class AgendamentoService {
   async update(id: string, updateAgendamentoDto: UpdateAgendamentoDto, payload: PayloadDto) {
     const usuario_id = String(payload.sub);
 
-    const agendamentoAtualizado = await this.agendamentoRepository.preload({
-      id,
-      ...updateAgendamentoDto,
-      usuario: { id: usuario_id }
-    });
+    try{
+      const agendamentoAtualizado = await this.agendamentoRepository.preload({
+        id,
+        ...updateAgendamentoDto,
+        usuario: { id: usuario_id }
+      });
 
-    if(!agendamentoAtualizado){
-        throw new NotFoundException('Agendamento não encontrado');
-      }
+      if(!agendamentoAtualizado){
+          throw new NotFoundException('Agendamento não encontrado');
+        }
 
       return await this.agendamentoRepository.save(agendamentoAtualizado);
 
@@ -111,11 +126,28 @@ export class AgendamentoService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao buscar agendamento');
+      throw new InternalServerErrorException('Erro ao atualizar agendamento');
     }
-  
+  }
 
-  remove(id: number) {
-    return `This action removes a #${id} agendamento`;
+  async remove(id: string, payload: PayloadDto) {
+    const usuario_id = String(payload.sub);
+
+    try{
+      const agendamento = await this.agendamentoRepository.findOne({
+        where: { id, usuario: { id: usuario_id }, status: In(['c']) }
+      });
+
+      if(!agendamento){
+        throw new NotFoundException('Agendamento não encontrado');
+      }
+
+      return await this.agendamentoRepository.remove(agendamento);
+    }catch(error:any){
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao excluir agendamento');
+    }
   }
 }

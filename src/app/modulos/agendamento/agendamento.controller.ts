@@ -38,7 +38,8 @@ export class AgendamentoController {
 
   @UseGuards(AuthTokenGuard)
   @Delete('excluir-agendamento/:id')
-  remove(@Param('id') id: string) {
-    return this.agendamentoService.remove(+id);
+  remove(@Param('id') id: string, @Req() request:Request) {
+    const payload = request['usuario']
+    return this.agendamentoService.remove(id, payload);
   }
 }

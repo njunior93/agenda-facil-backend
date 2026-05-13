@@ -3,7 +3,7 @@ import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { AuthTokenGuard } from 'src/auth/guard/auth-token.guard';
-import { request } from 'express';
+import { Request } from 'express';
 
 @Controller('cliente')
 export class ClienteController {
@@ -37,8 +37,10 @@ export class ClienteController {
     return this.clienteService.update(id, updateClienteDto, payload);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.clienteService.remove(+id);
+  @UseGuards(AuthTokenGuard)
+  @Delete('excluir-cliente/:id')
+  remove(@Param('id') id: string, @Req() request: Request) {
+    const payload = request['usuario']
+    return this.clienteService.remove(id, payload);
   }
 }
