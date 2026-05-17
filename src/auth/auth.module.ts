@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
-import { AuthSerivce } from './auth.service';
+import { AuthService } from './auth.service';
 import { UsuarioModule } from 'src/app/modulos/usuario/usuario.module';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { Usuario } from 'src/app/modulos/usuario/entities/usuario.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ResetSenhaToken } from './entities/reset-senha-token.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthSerivce],
+  providers: [AuthService],
   imports: [
-    TypeOrmModule.forFeature([Usuario]), 
+    MailerModule,
+    TypeOrmModule.forFeature([Usuario, ResetSenhaToken]), 
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig)
 ]

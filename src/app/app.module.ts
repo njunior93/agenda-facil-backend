@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
 import jwtConfig from 'src/auth/config/jwt.config';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -24,6 +25,20 @@ import jwtConfig from 'src/auth/config/jwt.config';
       },
       autoLoadEntities: true, 
       synchronize: true,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: "suagendafacil@gmail.com",
+          pass: "ugzo bgbf uvvl vnth"
+        },
+      },
+      defaults: {
+        from: '"Agenda Fácil" <no-reply@gmail.com>',
+      },
     }),
     AuthModule, 
     UsuarioModule, 

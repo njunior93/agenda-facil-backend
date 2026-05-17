@@ -1,13 +1,15 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { AuthSerivce } from "./auth.service";
+import { AuthService } from "./auth.service";
 import { LoginAuthDto } from "./dto/login-auth.dto";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { authLoginDto } from "src/app/shared/dto/authLogin.dto";
+import { EsqueciSenhaDto } from "./dto/esqueci-senha.dto";
+import { ResetSenhaDto } from "./dto/reset-senha.dto";
 
 @ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthSerivce) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
     @ApiOperation({ summary: 'Login do Usuário' })
@@ -27,5 +29,14 @@ export class AuthController {
     login(@Body() loginAuthDto: LoginAuthDto) {
       return this.authService.login(loginAuthDto);
     }
-  
+
+  @Post('resetar-senha')
+    esqueciMinhaSenha(@Body() esqueciSenhaDto: EsqueciSenhaDto) {
+    return this.authService.esqueciMinhaSenha(esqueciSenhaDto);
+  }
+
+  @Post('confirmar-reset')
+   resetPassword(@Body() resetPasswordDto: ResetSenhaDto) {
+    return this.authService.resetPassword(resetPasswordDto);
+  }
 }
