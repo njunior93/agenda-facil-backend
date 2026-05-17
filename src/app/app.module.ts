@@ -6,7 +6,7 @@ import { ClienteModule } from './modulos/cliente/cliente.module';
 import { ServicoModule } from './modulos/servico/servico.module';
 import { AgendamentoModule } from './modulos/agendamento/agendamento.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -26,20 +26,24 @@ import { MailerModule } from '@nestjs-modules/mailer';
       autoLoadEntities: true, 
       synchronize: true,
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.gmail.com',
-        port: 587,
+    MailerModule.forRootAsync({
+      imports:[ConfigModule],
+      useFactory: async (configService: ConfigService) =>({
+        transport: {
+        host: configService.get<string>('MAIL_HOST'),
+        port: configService.get<number>('MAIL_PORT'),
         secure: false,
         auth: {
-          user: "suagendafacil@gmail.com",
-          pass: "ugzo bgbf uvvl vnth"
+          user: configService.get<string>('MAIL_USER'),
+          pass: configService.get<string>('MAIL_PASS'),
         },
       },
       defaults: {
-        from: '"Agenda Fácil" <no-reply@gmail.com>',
+        from: configService.get<string>('MAIL_FROM'),
       },
     }),
+    inject: [ConfigService],
+  }),
     AuthModule, 
     UsuarioModule, 
     ClienteModule, 
